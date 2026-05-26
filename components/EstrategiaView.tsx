@@ -126,7 +126,7 @@ export default function EstrategiaView() {
 // ============================================================================
 function ResumenEjecutivo() {
   return (
-    <div className="card-elevated p-7 md:p-10 mb-10 relative overflow-hidden bg-gradient-to-br from-white via-white to-rho-ultralight/40">
+    <div className="card-elevated p-6 md:p-8 mb-10 relative overflow-hidden bg-gradient-to-br from-white via-white to-rho-ultralight/40">
       <div className="absolute -top-10 -right-10 w-72 h-72 bg-amber-100/30 rounded-full blur-3xl" />
       <div className="relative grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-8">
         <div>
@@ -222,7 +222,7 @@ function SituacionUno() {
   const burnRate = SITUACION_1.cajaActual / Math.max(1, daysLeft);
 
   return (
-    <div className="card-elevated p-7 md:p-9 mb-8 border-l-4 border-amber-400">
+    <div className="card-elevated p-6 md:p-8 mb-8 border-l-4 border-amber-400">
       <div className="flex items-start gap-3 mb-5">
         <div className="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-700 shrink-0">
           <Clock className="w-6 h-6" />
@@ -344,7 +344,7 @@ function SituacionDos() {
   const maxVal = SITUACION_2.autorizado;
 
   return (
-    <div className="card-elevated p-7 md:p-9 mb-8 border-l-4 border-red-400">
+    <div className="card-elevated p-6 md:p-8 mb-8 border-l-4 border-red-400">
       <div className="flex items-start gap-3 mb-5">
         <div className="w-12 h-12 rounded-2xl bg-red-100 flex items-center justify-center text-red-700 shrink-0">
           <AlertTriangle className="w-6 h-6" />
@@ -368,24 +368,39 @@ function SituacionDos() {
         <p className="text-xs uppercase tracking-wider text-ink-tertiary font-semibold mb-4">
           Composición del plan contractual · waterfall
         </p>
-        <div className="relative h-72 flex items-end justify-around gap-3">
-          {bars.map((b, i) => {
-            const heightPct = ((b.end - b.start) / maxVal) * 100;
-            const offsetPct = (b.start / maxVal) * 100;
-            return (
-              <div key={i} className="flex-1 flex flex-col items-center relative h-full">
-                <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end h-full">
+        <div className="relative" style={{ height: 280 }}>
+          {/* Grid lines */}
+          {[0.25, 0.5, 0.75, 1].map((f) => (
+            <div
+              key={f}
+              className="absolute left-0 right-0 border-t border-dashed border-ink-quaternary/30"
+              style={{ bottom: `${f * 100}%` }}
+            />
+          ))}
+          {/* Baseline */}
+          <div className="absolute left-0 right-0 bottom-0 h-px bg-ink-quaternary/60" />
+
+          <div className="absolute inset-0 flex items-end justify-around gap-2 md:gap-4 px-2">
+            {bars.map((b, i) => {
+              const heightPct = ((b.end - b.start) / maxVal) * 100;
+              const offsetPct = (b.start / maxVal) * 100;
+              return (
+                <div
+                  key={i}
+                  className="flex-1 flex flex-col justify-end relative h-full max-w-[140px]"
+                >
                   <div
-                    className="rounded-t-lg transition-all duration-1000 relative group hover:brightness-110"
+                    className="rounded-t-lg transition-all duration-1000 hover:brightness-110 relative"
                     style={{
                       height: `${heightPct}%`,
                       marginBottom: `${offsetPct}%`,
                       background: `linear-gradient(180deg, ${b.color}, ${b.color}cc)`,
+                      minHeight: 4,
                     }}
+                    title={`${b.label}: ${b.type === "out" ? "−" : ""}${fmtCLP(Math.abs(b.value))}`}
                   >
-                    {/* Value label */}
                     <div
-                      className="absolute -top-7 left-1/2 -translate-x-1/2 mono-num text-xs font-semibold whitespace-nowrap"
+                      className="absolute -top-6 left-1/2 -translate-x-1/2 mono-num text-[11px] font-semibold whitespace-nowrap"
                       style={{ color: b.color }}
                     >
                       {b.type === "out" ? "−" : ""}
@@ -393,27 +408,23 @@ function SituacionDos() {
                     </div>
                   </div>
                 </div>
+              );
+            })}
+          </div>
+        </div>
 
-                {/* Connecting dashed line */}
-                {i < bars.length - 1 && (
-                  <div
-                    className="absolute top-0 right-0 translate-x-1/2 w-px border-r border-dashed border-ink-quaternary z-0"
-                    style={{ height: "100%", bottom: 0 }}
-                  />
-                )}
-
-                {/* Label */}
-                <div className="absolute -bottom-12 inset-x-0 text-center">
-                  <p className="text-[11px] font-medium text-ink-primary leading-tight">{b.label}</p>
-                </div>
-              </div>
-            );
-          })}
+        {/* Labels alineados debajo */}
+        <div className="flex justify-around gap-2 md:gap-4 mt-4 px-2">
+          {bars.map((b, i) => (
+            <div key={i} className="flex-1 max-w-[140px] text-center">
+              <p className="text-[11px] font-semibold text-ink-primary leading-tight">{b.label}</p>
+            </div>
+          ))}
         </div>
       </div>
 
       {/* Detail grid */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-16">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mt-8">
         <DetailBox
           label="Autorizado"
           value={SITUACION_2.autorizado}
@@ -516,7 +527,7 @@ function EstrategiaPanimavida() {
   const total = segments.reduce((a, s) => a + s.value, 0);
 
   return (
-    <div className="card-elevated p-7 md:p-9 mb-8">
+    <div className="card-elevated p-6 md:p-8 mb-8">
       <div className="flex items-start gap-3 mb-5">
         <div className="w-12 h-12 rounded-2xl bg-violet-100 flex items-center justify-center text-violet-700 shrink-0">
           <Factory className="w-6 h-6" />
@@ -676,7 +687,7 @@ function EstrategiaSanExpedito() {
   ];
 
   return (
-    <div className="card-elevated p-7 md:p-9 mb-8">
+    <div className="card-elevated p-6 md:p-8 mb-8">
       <div className="flex items-start gap-3 mb-5">
         <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-700 shrink-0">
           <TrendingUp className="w-6 h-6" />
@@ -841,7 +852,7 @@ function NuevosProyectos() {
   ];
 
   return (
-    <div className="card-elevated p-7 md:p-9 mb-8">
+    <div className="card-elevated p-6 md:p-8 mb-8">
       <div className="flex items-start gap-3 mb-5">
         <div className="w-12 h-12 rounded-2xl bg-cyan-100 flex items-center justify-center text-cyan-700 shrink-0">
           <Zap className="w-6 h-6" />
@@ -901,7 +912,7 @@ function NuevosProyectos() {
 
 function DecisionFinal() {
   return (
-    <div className="card-elevated p-7 md:p-9 mb-8 bg-gradient-to-br from-white via-rho-ultralight/30 to-white">
+    <div className="card-elevated p-6 md:p-8 mb-8 bg-gradient-to-br from-white via-rho-ultralight/30 to-white">
       <div className="flex items-start gap-3 mb-5">
         <div className="w-12 h-12 rounded-2xl bg-rho-dark text-white flex items-center justify-center shrink-0">
           <Target className="w-6 h-6" />
@@ -1205,7 +1216,7 @@ const WORKSTREAM_COLOR: Record<FaseAccion["workstream"], string> = {
 function EstrategiaRoadmap() {
   const totalDias = 90;
   return (
-    <div className="card-elevated p-7 md:p-9 mb-8 bg-gradient-to-br from-rho-ultralight/30 via-white to-cyan-50/30 border-l-4 border-rho-medium">
+    <div className="card-elevated p-6 md:p-8 mb-8 bg-gradient-to-br from-rho-ultralight/30 via-white to-cyan-50/30 border-l-4 border-rho-medium">
       <div className="flex items-start gap-3 mb-6">
         <div className="w-12 h-12 rounded-2xl bg-rho-dark text-white flex items-center justify-center shrink-0">
           <Network className="w-6 h-6" />
@@ -1441,7 +1452,7 @@ function KpisExito() {
   ];
 
   return (
-    <div className="card-elevated p-7 md:p-9 mb-8">
+    <div className="card-elevated p-6 md:p-8 mb-8">
       <div className="flex items-start gap-3 mb-6">
         <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-700 shrink-0">
           <Target className="w-6 h-6" />

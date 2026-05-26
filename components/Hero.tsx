@@ -88,7 +88,7 @@ export default function Hero() {
 
         {/* === HEADLINE KPI STRIPE — 5 tarjetas grandes con sparkline === */}
         <div className="card-elevated overflow-hidden mb-6 animate-slide-up">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-ink-quaternary/40">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 divide-y lg:divide-y-0 lg:divide-x divide-ink-quaternary/40">
             <BigKpi
               label="Plan contractual"
               value={k.planContractual}
