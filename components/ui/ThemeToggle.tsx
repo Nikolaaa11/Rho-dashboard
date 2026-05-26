@@ -12,9 +12,9 @@ export function useTheme(): [Theme, (t: Theme) => void] {
 
   useEffect(() => {
     try {
+      // Default light (Apple branding). Only honor explicit user choice.
       const stored = (localStorage.getItem(KEY) as Theme | null) || null;
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const initial = stored ?? (prefersDark ? "dark" : "light");
+      const initial: Theme = stored === "dark" ? "dark" : "light";
       setThemeState(initial);
       document.documentElement.setAttribute("data-theme", initial);
     } catch {
