@@ -21,6 +21,7 @@ export const TABS: TabDef[] = [
   { id: "overview", label: "Resumen", group: "Resumen", description: "Vista consolidada del capital" },
   { id: "banca", label: "Banca / Directorio", group: "Resumen", description: "Vista institucional ILPA" },
   { id: "decisiones", label: "Decisiones", group: "Resumen", description: "Action items para directorio" },
+  { id: "estrategia", label: "Estrategia Capital", group: "Resumen", description: "2 situaciones críticas + escenarios" },
   { id: "desembolsos", label: "Plan de capital", group: "Capital", description: "6 cuotas Adenda N°2" },
   { id: "proyectos", label: "Proyectos", group: "Portafolio", description: "Ficha por proyecto" },
   { id: "mapa", label: "Mapa & Gantt", group: "Portafolio", description: "Geografía + cronograma" },
