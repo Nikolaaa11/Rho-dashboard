@@ -108,6 +108,12 @@ export default function EstrategiaView() {
         {/* === ESCENARIOS / DECISIÓN === */}
         <DecisionFinal />
 
+        {/* === ESTRATEGIA RECOMENDADA · ROADMAP 90 DÍAS === */}
+        <EstrategiaRoadmap />
+
+        {/* === KPIs DE ÉXITO A 90 DÍAS === */}
+        <KpisExito />
+
         {/* === CLOSING === */}
         <ClosingNote />
       </div>
@@ -1030,6 +1036,492 @@ function Escenario({
       >
         ▸ {veredicto}
       </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// ROADMAP 90 DÍAS — Estrategia ejecutable
+// ============================================================================
+
+interface FaseAccion {
+  id: string;
+  numero: number;
+  titulo: string;
+  owner: string;
+  diasStart: number;
+  diasEnd: number;
+  color: string;
+  acciones: string[];
+  hito: string;
+  monto?: string;
+  prioridad: "critica" | "alta" | "media";
+  workstream: "Caja" | "Equity" | "Banca" | "Comercial" | "Pipeline";
+}
+
+const FASES: FaseAccion[] = [
+  {
+    id: "f1",
+    numero: 1,
+    titulo: "Asegurar caja operativa al 31 jul",
+    owner: "Victoria · AFIS",
+    diasStart: 0,
+    diasEnd: 60,
+    color: "#dc2626",
+    prioridad: "critica",
+    workstream: "Caja",
+    acciones: [
+      "Preparar solicitud formal a aportantes",
+      "Calendarizar wire transfer antes del 25 jul",
+      "Validar disponibilidad fondo AFIS",
+      "Confirmar receptor en CC BICE",
+    ],
+    hito: "Caja >= $200M al 31 jul",
+    monto: "Mínimo $200M",
+  },
+  {
+    id: "f2",
+    numero: 2,
+    titulo: "Roadshow inversionista equity Panimávida",
+    owner: "Guido + Nicolás · GG",
+    diasStart: 0,
+    diasEnd: 60,
+    color: "#8b5cf6",
+    prioridad: "critica",
+    workstream: "Equity",
+    acciones: [
+      "Armar pitch deck Panimávida (TIR 10% + PPA + SEA)",
+      "Lista 8-10 LPs target (family offices CL + DFIs)",
+      "Reuniones 1-on-1 (1 por semana mínimo)",
+      "Cerrar Memorandum of Understanding con 1-2 LPs",
+    ],
+    hito: "LOI firmado por $750M",
+    monto: "$750M target",
+  },
+  {
+    id: "f3",
+    numero: 3,
+    titulo: "Activar match CORFO",
+    owner: "AFIS · Cumplimiento CORFO",
+    diasStart: 45,
+    diasEnd: 75,
+    color: "#10b981",
+    prioridad: "alta",
+    workstream: "Equity",
+    acciones: [
+      "Presentar LOI inversionista a CORFO",
+      "Llenar formularios match",
+      "Reportar uso de fondos previo",
+      "Cierre desembolso CORFO",
+    ],
+    hito: "Match CORFO comprometido $750M",
+    monto: "$750M",
+  },
+  {
+    id: "f4",
+    numero: 4,
+    titulo: "Propuesta project finance al banco",
+    owner: "Guido · CFO",
+    diasStart: 60,
+    diasEnd: 90,
+    color: "#06b6d4",
+    prioridad: "alta",
+    workstream: "Banca",
+    acciones: [
+      "Term sheet con Santander/BCI con $1.500M equity disponible",
+      "Modelo financiero stress-tested",
+      "Garantías estructuradas (PPA + activos)",
+      "Carta de oferta firmada",
+    ],
+    hito: "Oferta bancaria $1.500M",
+    monto: "$1.500M",
+  },
+  {
+    id: "f5",
+    numero: 5,
+    titulo: "Cierre venta San Expedito",
+    owner: "Comercial + asesores PPA",
+    diasStart: 0,
+    diasEnd: 90,
+    color: "#f59e0b",
+    prioridad: "critica",
+    workstream: "Comercial",
+    acciones: [
+      "Mantener asesores activos diariamente",
+      "Cerrar pricing con compradores top",
+      "Due diligence comprador + escritura",
+      "Wire $2.500M (target neto $2.000M)",
+    ],
+    hito: "Venta SE cerrada en >= $2.500M",
+    monto: "$2.500M",
+  },
+  {
+    id: "f6",
+    numero: 6,
+    titulo: "Quebrada Escobar 2 a banco",
+    owner: "Nicolás · Desarrollo",
+    diasStart: 15,
+    diasEnd: 60,
+    color: "#a855f7",
+    prioridad: "media",
+    workstream: "Pipeline",
+    acciones: [
+      "Recibir carpeta tributaria proyecto en operación",
+      "Estructurar leasing financiero",
+      "Crédito de grupo ya disponible — formalizar",
+      "Presentar dossier al banco",
+    ],
+    hito: "Estructura crédito grupo aprobada",
+    monto: "Pre-aprobado",
+  },
+  {
+    id: "f7",
+    numero: 7,
+    titulo: "San Expedito 2 (150 MW) en desarrollo",
+    owner: "Equipo desarrollo",
+    diasStart: 30,
+    diasEnd: 90,
+    color: "#3C8B3C",
+    prioridad: "media",
+    workstream: "Pipeline",
+    acciones: [
+      "Estudios preliminares site selection",
+      "Conversaciones con Energy Asset / off-takers",
+      "Permisos preliminares iniciados",
+      "Definir CapEx + estructura financiamiento",
+    ],
+    hito: "MoU off-taker + SEA preliminar",
+  },
+];
+
+const WORKSTREAM_COLOR: Record<FaseAccion["workstream"], string> = {
+  Caja: "#dc2626",
+  Equity: "#8b5cf6",
+  Banca: "#06b6d4",
+  Comercial: "#f59e0b",
+  Pipeline: "#10b981",
+};
+
+function EstrategiaRoadmap() {
+  const totalDias = 90;
+  return (
+    <div className="card-elevated p-7 md:p-9 mb-8 bg-gradient-to-br from-rho-ultralight/30 via-white to-cyan-50/30 border-l-4 border-rho-medium">
+      <div className="flex items-start gap-3 mb-6">
+        <div className="w-12 h-12 rounded-2xl bg-rho-dark text-white flex items-center justify-center shrink-0">
+          <Network className="w-6 h-6" />
+        </div>
+        <div className="flex-1">
+          <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-rho-dark mb-1">
+            Estrategia ejecutable · próximos 90 días
+          </p>
+          <h3 className="text-2xl md:text-3xl font-semibold tracking-tightest">
+            Roadmap: 7 frentes en paralelo para destrabar Panimávida.
+          </h3>
+          <p className="text-ink-secondary mt-2 max-w-3xl">
+            Plan de acción concreto basado en el Escenario C (inversionista + CORFO + banco) y
+            ejecutado en paralelo con la venta de San Expedito + nuevos proyectos. Cada fase tiene
+            owner, deliverables, plazo y hito de éxito.
+          </p>
+        </div>
+      </div>
+
+      {/* Workstream legend */}
+      <div className="flex flex-wrap gap-3 mb-6 pb-5 border-b border-ink-quaternary/40">
+        {Object.entries(WORKSTREAM_COLOR).map(([k, c]) => (
+          <span key={k} className="flex items-center gap-1.5 text-xs">
+            <span className="w-3 h-3 rounded-md" style={{ background: c }} />
+            <span className="text-ink-secondary font-medium">{k}</span>
+          </span>
+        ))}
+      </div>
+
+      {/* Gantt visual */}
+      <div className="bg-surface-secondary/40 rounded-2xl p-5 mb-6 overflow-x-auto">
+        <div className="min-w-[820px]">
+          {/* X axis */}
+          <div className="flex items-end mb-2 pl-[280px] pr-4 text-[10px] uppercase tracking-wider text-ink-tertiary font-semibold">
+            {[0, 15, 30, 45, 60, 75, 90].map((d) => (
+              <div
+                key={d}
+                className="flex-1 text-center border-l border-ink-quaternary/40 py-1"
+                style={{ minWidth: 0 }}
+              >
+                d{d}
+              </div>
+            ))}
+          </div>
+
+          {FASES.map((f) => {
+            const leftPct = (f.diasStart / totalDias) * 100;
+            const widthPct = ((f.diasEnd - f.diasStart) / totalDias) * 100;
+            return (
+              <div
+                key={f.id}
+                className="flex items-center mb-2 group hover:bg-white/60 rounded-lg transition-colors"
+              >
+                <div className="w-[280px] shrink-0 px-3 py-2 flex items-center gap-3">
+                  <div
+                    className="w-7 h-7 rounded-lg flex items-center justify-center text-white font-bold text-xs shrink-0"
+                    style={{ background: f.color }}
+                  >
+                    {f.numero}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-ink-primary truncate leading-tight">
+                      {f.titulo}
+                    </p>
+                    <p className="text-[10px] text-ink-tertiary truncate">{f.owner}</p>
+                  </div>
+                </div>
+
+                <div className="flex-1 relative h-10">
+                  <div className="absolute inset-y-0 left-0 right-0 grid grid-cols-6 pointer-events-none">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                      <div key={i} className="border-l border-dashed border-ink-quaternary/30" />
+                    ))}
+                  </div>
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2 h-7 rounded-lg flex items-center px-3 text-[10px] font-semibold text-white overflow-hidden group-hover:h-8 transition-all shadow-sm"
+                    style={{
+                      left: `${leftPct}%`,
+                      width: `${widthPct}%`,
+                      background: `linear-gradient(90deg, ${f.color}, ${f.color}cc)`,
+                    }}
+                    title={`${f.titulo} · d${f.diasStart} → d${f.diasEnd}`}
+                  >
+                    <span className="truncate">
+                      {f.monto && widthPct > 18 ? f.monto : `d${f.diasEnd - f.diasStart}d`}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Cards detalle por fase */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {FASES.map((f) => (
+          <FaseCard key={f.id} f={f} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function FaseCard({ f }: { f: FaseAccion }) {
+  const prioridad = {
+    critica: { label: "CRÍTICA", bg: "bg-red-100", text: "text-red-800" },
+    alta: { label: "ALTA", bg: "bg-amber-100", text: "text-amber-800" },
+    media: { label: "MEDIA", bg: "bg-cyan-100", text: "text-cyan-800" },
+  }[f.prioridad];
+
+  return (
+    <div
+      className="rounded-2xl border p-5 bg-white transition-shadow hover:shadow-md"
+      style={{ borderColor: f.color + "40" }}
+    >
+      <div className="flex items-start gap-3 mb-3">
+        <div
+          className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-bold text-lg shrink-0"
+          style={{ background: f.color }}
+        >
+          {f.numero}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-base font-semibold text-ink-primary leading-tight">{f.titulo}</p>
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
+            <span
+              className={`pill ${prioridad.bg} ${prioridad.text} text-[9px] font-bold`}
+            >
+              {prioridad.label}
+            </span>
+            <span className="pill pill-neutral text-[9px]">{f.workstream}</span>
+            <span className="text-[10px] text-ink-tertiary mono-num">
+              d{f.diasStart}–d{f.diasEnd}
+            </span>
+          </div>
+        </div>
+        {f.monto && (
+          <p
+            className="mono-num text-sm font-semibold tabular-nums text-right shrink-0"
+            style={{ color: f.color }}
+          >
+            {f.monto}
+          </p>
+        )}
+      </div>
+
+      <div className="mb-3">
+        <p className="text-[10px] uppercase tracking-wider text-ink-tertiary font-bold mb-1.5">
+          Owner
+        </p>
+        <p className="text-sm font-medium text-ink-primary">{f.owner}</p>
+      </div>
+
+      <div className="mb-3">
+        <p className="text-[10px] uppercase tracking-wider text-ink-tertiary font-bold mb-1.5">
+          Acciones
+        </p>
+        <ul className="space-y-1">
+          {f.acciones.map((a, i) => (
+            <li key={i} className="text-xs text-ink-secondary flex items-start gap-1.5">
+              <span style={{ color: f.color }}>▸</span>
+              <span>{a}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div
+        className="mt-3 pt-3 border-t flex items-start gap-2"
+        style={{ borderColor: f.color + "30" }}
+      >
+        <Target className="w-4 h-4 shrink-0 mt-0.5" style={{ color: f.color }} />
+        <div>
+          <p className="text-[10px] uppercase tracking-wider font-bold" style={{ color: f.color }}>
+            Hito de éxito
+          </p>
+          <p className="text-sm font-medium text-ink-primary leading-snug">{f.hito}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// KPIs DE ÉXITO A 90 DÍAS
+// ============================================================================
+
+function KpisExito() {
+  const kpis = [
+    {
+      label: "Capital comprometido (LP + CORFO)",
+      target: "$1.500M",
+      desc: "Equity asegurado vía inversionista + match CORFO",
+      color: "#8b5cf6",
+      Icon: Users,
+    },
+    {
+      label: "Oferta bancaria firme",
+      target: "$1.500M",
+      desc: "Term sheet bancario para project finance Panimávida",
+      color: "#06b6d4",
+      Icon: Banknote,
+    },
+    {
+      label: "Venta San Expedito cerrada",
+      target: "$2.500M",
+      desc: "Wire recibido + escritura firmada",
+      color: "#f59e0b",
+      Icon: TrendingUp,
+    },
+    {
+      label: "Caja saludable post-julio",
+      target: "$200M+",
+      desc: "Sin riesgo de liquidez operativa",
+      color: "#dc2626",
+      Icon: Wallet,
+    },
+    {
+      label: "Pipeline nuevo activado",
+      target: "2 proyectos",
+      desc: "Quebrada Escobar 2 al banco + SE 2 con MoU off-taker",
+      color: "#10b981",
+      Icon: Zap,
+    },
+    {
+      label: "Reservas FIP intactas",
+      target: "$435M",
+      desc: "Capital original protegido (no salimos a financiar Panimávida con esto)",
+      color: "#3C8B3C",
+      Icon: CircleDollarSign,
+    },
+  ];
+
+  return (
+    <div className="card-elevated p-7 md:p-9 mb-8">
+      <div className="flex items-start gap-3 mb-6">
+        <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-700 shrink-0">
+          <Target className="w-6 h-6" />
+        </div>
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-emerald-700 mb-1">
+            North star · Si en 90 días logramos esto, ganamos
+          </p>
+          <h3 className="text-2xl md:text-3xl font-semibold tracking-tightest">
+            6 KPIs de éxito.
+          </h3>
+          <p className="text-ink-secondary mt-2 max-w-3xl">
+            Estos son los entregables medibles del plan de 90 días. Cada uno tiene un target
+            numérico claro para evaluar avance.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {kpis.map((k, i) => (
+          <KpiExitoCard key={i} {...k} />
+        ))}
+      </div>
+
+      {/* Footer con outcome esperado */}
+      <div className="mt-6 p-5 rounded-2xl bg-rho-ultralight/40 border border-rho-medium/30">
+        <div className="flex items-start gap-3">
+          <Sparkles className="w-5 h-5 text-rho-dark shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-bold text-rho-dark uppercase tracking-wider mb-1">
+              Outcome esperado al día 90
+            </p>
+            <p className="text-base text-ink-primary leading-relaxed">
+              Panimávida con financiamiento <strong>$3.000M</strong> cerrado (equity + CORFO +
+              banco) y construcción arrancando. Venta SE cristalizada en <strong>$2.500M</strong> con
+              devolución a inversionistas y <strong>$1.000M</strong> disponibles para
+              reinversión/dividendos. Pipeline Quebrada Escobar 2 + SE 2 activados.{" "}
+              <strong className="text-rho-dark">Sin tocar los $435M reservados del FIP.</strong>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function KpiExitoCard({
+  label,
+  target,
+  desc,
+  color,
+  Icon,
+}: {
+  label: string;
+  target: string;
+  desc: string;
+  color: string;
+  Icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+}) {
+  return (
+    <div
+      className="rounded-2xl p-5 border-2 transition-transform hover:scale-[1.02]"
+      style={{ borderColor: color + "30", background: color + "06" }}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <div
+          className="w-9 h-9 rounded-xl flex items-center justify-center"
+          style={{ background: color + "20" }}
+        >
+          <Icon className="w-4 h-4" style={{ color }} />
+        </div>
+        <span
+          className="mono-num text-2xl font-semibold tabular-nums"
+          style={{ color }}
+        >
+          {target}
+        </span>
+      </div>
+      <p className="text-sm font-semibold text-ink-primary leading-tight">{label}</p>
+      <p className="text-xs text-ink-tertiary mt-1 leading-snug">{desc}</p>
     </div>
   );
 }
