@@ -54,7 +54,7 @@ export default function CartaView() {
               className="btn-primary"
             >
               <Printer className="w-4 h-4" />
-              Imprimir
+              Imprimir / Guardar PDF
             </button>
           }
         />

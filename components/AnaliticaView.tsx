@@ -21,6 +21,7 @@ import {
 } from "@/lib/derived";
 import SectionHeader from "./ui/SectionHeader";
 import ChartCard from "./ui/ChartCard";
+import SankeyFlow from "./ui/SankeyFlow";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -99,6 +100,7 @@ export default function AnaliticaView() {
         </div>
 
         {/* ROW 4 — Capital flow Sankey-like */}
+        <SankeyFlowCard />
         <CapitalFlow />
 
         {/* ROW 5 — Velocity + Category evolution */}
@@ -730,7 +732,25 @@ function ProjectsBubble() {
 }
 
 // ============================================================================
-// 7. CAPITAL FLOW
+// 7a. SANKEY FLOW — diagrama real con curvas
+// ============================================================================
+function SankeyFlowCard() {
+  return (
+    <ChartCard
+      icon={<Network className="w-4 h-4" />}
+      eyebrow="Sankey diagram"
+      title="Flujo de capital: FIP → Proyecto → Categoría"
+      subtitle="El grosor de cada banda es proporcional al monto. Hover para ver detalle."
+      accent="rho"
+      className="mb-6"
+    >
+      <SankeyFlow height={520} />
+    </ChartCard>
+  );
+}
+
+// ============================================================================
+// 7b. CAPITAL FLOW — versión simple por proyecto
 // ============================================================================
 
 function CapitalFlow() {

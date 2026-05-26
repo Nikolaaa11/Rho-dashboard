@@ -22,6 +22,7 @@ import SectionHeader from "./ui/SectionHeader";
 import AnimatedNumber from "./ui/AnimatedNumber";
 import Sparkline from "./ui/Sparkline";
 import DevolucionesCard from "./ui/DevolucionesCard";
+import NextCallsCountdown from "./ui/NextCallsCountdown";
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -128,6 +129,11 @@ export default function BancaView() {
         <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-6 mb-6 mt-8">
           <JCurveChart data={jCurve} planLimit={k.planContractual} />
           <NavWaterfall data={navWaterfall} k={k} />
+        </div>
+
+        {/* === NEXT CALLS COUNTDOWN === */}
+        <div className="mb-6">
+          <NextCallsCountdown limit={3} />
         </div>
 
         {/* === ROW 2 — Capital Stack + Concentration === */}
