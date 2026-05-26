@@ -617,6 +617,7 @@ export interface SaldoCuenta {
 }
 
 export function saldosPorCuenta(): SaldoCuenta[] {
+  // Calcular SIEMPRE desde el último movimiento por fecha (más confiable que metadata).
   const movs = dataset.movimientos;
   const map: Record<string, { mov: number; ultMov?: Movimiento }> = {};
   for (const m of movs) {
@@ -627,11 +628,9 @@ export function saldosPorCuenta(): SaldoCuenta[] {
       map[c].ultMov = m;
     }
   }
-  // Fallback: usar metadata.cuentas si existe
-  const meta = dataset.metadata?.cuentas;
   return Object.entries(map).map(([cuenta, v]) => ({
     cuenta,
-    saldoActual: meta?.[cuenta]?.saldo_final ?? v.ultMov?.SALDO ?? 0,
+    saldoActual: v.ultMov?.SALDO ?? 0,
     movimientos: v.mov,
   }));
 }

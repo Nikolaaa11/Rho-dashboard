@@ -150,9 +150,11 @@ def main():
         m["esDevolucion"] = bool(m["esDevolucion"])
         m["CentroDevolucion"] = str(m.get("CentroDevolucion") or "")
 
-    # Stats por cuenta
-    saldo_st = df_st["SALDO"].iloc[-1] if len(df_st) > 0 else 0
-    saldo_bice = df_bice["SALDO"].iloc[-1] if len(df_bice) > 0 else 0
+    # Stats por cuenta — ordenar por fecha ANTES de tomar el último saldo
+    df_st_sorted = df_st.sort_values("FECHA") if len(df_st) > 0 else df_st
+    df_bice_sorted = df_bice.sort_values("FECHA") if len(df_bice) > 0 else df_bice
+    saldo_st = df_st_sorted["SALDO"].iloc[-1] if len(df_st_sorted) > 0 else 0
+    saldo_bice = df_bice_sorted["SALDO"].iloc[-1] if len(df_bice_sorted) > 0 else 0
 
     data = {
         "movimientos": movimientos,
