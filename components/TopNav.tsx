@@ -27,6 +27,7 @@ export const TABS: TabDef[] = [
   { id: "analitica", label: "Analítica", group: "Insights", description: "Galería de visualizaciones" },
   { id: "risk", label: "Riesgos", group: "Insights", description: "Tablero de riesgos y datos" },
   { id: "esg", label: "Impacto ESG", group: "Insights", description: "Métricas de impacto" },
+  { id: "audit", label: "Auditoría", group: "Insights", description: "Health checks & validaciones" },
 ];
 
 export default function TopNav({

@@ -669,14 +669,20 @@ export function ocSummary(): OCSummary {
 }
 
 // ============================================================================
-// Saldo bancario (saldo actual de la cuenta corriente)
+// Saldo bancario (consolidado de TODAS las cuentas activas)
 // ============================================================================
 export function saldoActual(): number {
-  const movs = movimientosHistoricos();
+  // Suma el saldo final de cada cuenta (último mov por cuenta).
+  const movs = dataset.movimientos;
   if (movs.length === 0) return 0;
-  // Tomamos saldo de la última fila ordenada por fecha
-  const last = [...movs].sort((a, b) => a.FECHA_STR.localeCompare(b.FECHA_STR)).pop();
-  return last?.SALDO ?? 0;
+  const byCuenta: Record<string, Movimiento> = {};
+  for (const m of movs) {
+    const c = m.Cuenta || "Santander";
+    if (!byCuenta[c] || m.FECHA_STR >= byCuenta[c].FECHA_STR) {
+      byCuenta[c] = m;
+    }
+  }
+  return Object.values(byCuenta).reduce((a, m) => a + (m.SALDO || 0), 0);
 }
 
 // ============================================================================

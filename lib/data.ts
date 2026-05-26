@@ -475,13 +475,40 @@ export interface CuotaConEstado extends CuotaAdenda {
   pctPago: number;
 }
 
+// Normaliza el campo Aporte_K para tolerar variaciones (espacios vs underscores,
+// mayúsculas, tildes). Devuelve la key canónica que matchea una cuota, o null.
+export function cuotaCanonica(aporteK: string | undefined | null): string | null {
+  if (!aporteK) return null;
+  const n = aporteK
+    .trim()
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[̀-ͯ]/g, "") // sin acentos
+    .replace(/[\s_]+/g, "_");
+  const map: Record<string, string> = {
+    primer_abono: "Primer_abono",
+    primera_cuota: "Primer_abono",
+    segundo_abono: "Segundo_abono",
+    segunda_cuota: "Segundo_abono",
+    tercer_abono: "Tercer_abono",
+    tercera_cuota: "Tercer_abono",
+    cuarto_abono: "Cuarto_abono",
+    cuarta_cuota: "Cuarto_abono",
+    quinto_abono: "Quinto_abono",
+    quinta_cuota: "Quinto_abono",
+    sexto_abono: "Sexto_abono",
+    sexta_cuota: "Sexto_abono",
+  };
+  return map[n] || null;
+}
+
 export function analizarCuotasAdenda(): CuotaConEstado[] {
   const today = new Date().toISOString().slice(0, 10);
   const movs = dataset.movimientos;
   return CUOTAS_ADENDA_N2.map((cuota) => {
-    // Pagos efectivos al banco con ese Aporte_K en categoría Capital
+    // Pagos efectivos al banco con ese Aporte_K en categoría Capital (tolerante a variantes)
     const pagosBancarios = movs.filter(
-      (m) => m.Aporte_K === cuota.aporteKey && m.ABONOS > 0 && m.General === "Capital"
+      (m) => cuotaCanonica(m.Aporte_K) === cuota.aporteKey && m.ABONOS > 0 && m.General === "Capital"
     );
     const pagado = pagosBancarios.reduce((a, b) => a + b.ABONOS, 0);
     const fechasPago = pagosBancarios.map((m) => m.FECHA_STR).sort();
@@ -489,7 +516,7 @@ export function analizarCuotasAdenda(): CuotaConEstado[] {
 
     // Gasto operativo ejecutado de esa cuota
     const ejecutado = movs
-      .filter((m) => m.Aporte_K === cuota.aporteKey && isOperativo(m))
+      .filter((m) => cuotaCanonica(m.Aporte_K) === cuota.aporteKey && isOperativo(m))
       .reduce((a, b) => a + b.EGRESO, 0);
 
     // Determinar estado
