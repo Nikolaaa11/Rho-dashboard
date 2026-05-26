@@ -350,14 +350,22 @@ export function getRiskSurface(): RiskItem[] {
   }
 
   // Dependencias críticas estructurales
+  // Sinosure: solo high si aún faltan cuotas materiales por pagar
+  const cuotasPendientes = cuotas.filter((c) => c.estado !== "Pagada");
+  const montoPendiente = cuotasPendientes.reduce((a, b) => a + b.monto, 0);
   items.push({
     id: "dep-sinosure",
     title: "Sinosure: línea condicionada a equity completo",
     description:
-      "La línea de seguro Sinosure para Panimávida + La Ligua exige el aporte de capital completo del FIP CEHTA reflejado en balance Rho.",
+      cuotasPendientes.length === 0
+        ? "Equity FIP completo. Línea Sinosure habilitada para activación operativa."
+        : `Faltan ${cuotasPendientes.length} cuota${cuotasPendientes.length === 1 ? "" : "s"} (${cuotasPendientes
+            .map((c) => c.letra)
+            .join(", ")}) por ${formatLocal(montoPendiente)} para destrabar Sinosure (Panimávida + La Ligua).`,
     category: "Comercial",
-    severity: "high",
-    action: "Completar cuotas e/f + Auditoría flash antes de Q3 2026.",
+    severity: cuotasPendientes.length === 0 ? "low" : cuotasPendientes.length <= 2 ? "medium" : "high",
+    amount: montoPendiente > 0 ? montoPendiente : undefined,
+    action: cuotasPendientes.length > 0 ? `Completar cuotas ${cuotasPendientes.map((c) => c.letra).join("/")} + Auditoría flash MCG.` : undefined,
   });
 
   items.push({

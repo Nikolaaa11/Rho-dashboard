@@ -23,6 +23,7 @@ import AnimatedNumber from "./ui/AnimatedNumber";
 import Sparkline from "./ui/Sparkline";
 import DevolucionesCard from "./ui/DevolucionesCard";
 import NextCallsCountdown from "./ui/NextCallsCountdown";
+import CuotasTimelineTemporal from "./ui/CuotasTimelineTemporal";
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -157,7 +158,10 @@ export default function BancaView() {
           <PerformanceSchedule k={k} oc={oc} esg={esg} />
         </div>
 
-        {/* === ROW 4 — Cuotas timeline === */}
+        {/* === ROW 4 — Timeline temporal real === */}
+        <CuotasTimelineTemporal />
+
+        {/* === ROW 5 — Cuotas detalle institucional === */}
         <CuotasTimelineInstitucional cuotas={cuotas} />
 
         {/* === Footer institutional === */}
