@@ -98,13 +98,13 @@ export default function CartaView() {
               Rho Generación es un IPP chileno con <strong>{esg.mwTotal} MW</strong> de capacidad
               entre solar PV y BESS, articulado en torno al primer proyecto agrivoltaico del país
               (Panimávida) y un BESS de gran escala en La Ligua co-ubicado con la planta solar
-              METLEN. A la fecha el FIP CEHTA ha aportado <strong>{fmtMM(k.pagado)}</strong> de los{" "}
-              <strong>{fmtMM(k.planContractual)}</strong> comprometidos en la Adenda N°2,
-              de los cuales <strong>{fmtMM(k.ejecutado)}</strong> ya están desplegados en gastos
-              operativos auditables{totalDev > 0 ? (
+              METLEN. A la fecha el FIP CEHTA ha aportado <strong>{fmtMM(k.pagado)}</strong> ({k.pctPagado.toFixed(0)}%)
+              de los <strong>{fmtMM(k.planContractual)}</strong> comprometidos en la Adenda N°2 —{" "}
+              <strong>{k.cuotasPagadas} de {k.cuotasTotal} cuotas cumplidas</strong> — y{" "}
+              <strong>{fmtMM(k.ejecutado)}</strong> están desplegados en gastos operativos auditables{totalDev > 0 ? (
                 <>
-                  {" "}— y <strong className="text-emerald-700">{fmtMM(totalDev)}</strong> recuperados vía
-                  devoluciones (boletas de garantía y reembolsos)
+                  , con <strong className="text-emerald-700">{fmtMM(totalDev)}</strong> recuperados
+                  vía boletas de garantía
                 </>
               ) : null}.
             </p>
@@ -144,13 +144,25 @@ export default function CartaView() {
               </h3>
               <ul className="space-y-3">
                 <Bullet>
-                  <strong>{cuotasPagadas.length} cuotas pagadas</strong> por un total de{" "}
+                  <strong>{cuotasPagadas.length} de 6 cuotas pagadas</strong> por un total de{" "}
                   {fmtMM(cuotasPagadas.reduce((a, b) => a + b.pagado, 0))}, alimentando capital de trabajo y obra civil.
                 </Bullet>
+                {saldos.length > 1 && (
+                  <Bullet>
+                    Liquidez disponible <strong>{fmtMM(saldos.reduce((a, s) => a + s.saldoActual, 0))}</strong> distribuida en{" "}
+                    {saldos.map((s) => `CC ${s.cuenta}`).join(" + ")} — diversificación bancaria operativa.
+                  </Bullet>
+                )}
                 <Bullet>
                   <strong>{oc.total} órdenes de compra</strong> emitidas a{" "}
                   {oc.proveedoresUnicos} proveedores, con {fmtMM(oc.pagado)} pagado ({oc.pctPagado.toFixed(0)}%).
                 </Bullet>
+                {totalDev > 0 && (
+                  <Bullet>
+                    <strong>{fmtMM(totalDev)} recuperados</strong> vía boletas de garantía liberadas
+                    (Santa Victoria + Codegua / Explícito).
+                  </Bullet>
+                )}
                 <Bullet>
                   <strong>Panimávida</strong> con SEA aprobado, PPA en negociación e inicio de
                   construcción agendado para mayo 2026 — primer agrivoltaico de Chile.
@@ -160,8 +172,7 @@ export default function CartaView() {
                   80% supplier finance (CATL en negociación) y 20% equity FIP.
                 </Bullet>
                 <Bullet>
-                  Pipeline de <strong>{esg.proyectosPipeline} proyectos adicionales</strong>{" "}
-                  ({esg.bessMW - 90 + esg.pvMW - 3} MW marginales) en distintas etapas de desarrollo.
+                  Pipeline en pre-evaluación: <strong>PMGD Quebrada Escobar (9 MW) + Ruil (5 MW)</strong>.
                 </Bullet>
               </ul>
             </div>

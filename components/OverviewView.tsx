@@ -15,10 +15,12 @@ import {
   inversionPorProyecto,
   headlineKPIs,
   ocSummary,
+  PROYECTOS_GEO,
 } from "@/lib/derived";
 import SectionHeader from "./ui/SectionHeader";
 import ChartCard from "./ui/ChartCard";
 import BulletChart from "./ui/BulletChart";
+import ChileMap, { type ChileMapPin } from "./ui/ChileMap";
 import {
   AreaChart,
   Area,
@@ -95,9 +97,12 @@ export default function OverviewView() {
             icon={<Target className="w-5 h-5" />}
             eyebrow="Capital trazable"
             title="Plan contractual notarial"
-            body="Adenda N°2 firmada el 27 oct 2025 ante notario establece 6 cuotas por $1.800M. 715 transacciones bancarias y 117 OC respaldan cada peso ejecutado peso por peso."
+            body="Adenda N°2 firmada el 27 oct 2025 ante notario establece 6 cuotas por $1.800M. 740 transacciones bancarias y 117 OC respaldan cada peso ejecutado peso por peso."
           />
         </div>
+
+        {/* === MINI MAPA + PORTAFOLIO === */}
+        <PortafolioMiniMap />
 
         <SectionHeader
           eyebrow="Visión consolidada"
@@ -277,6 +282,76 @@ function StoryCard({
       <p className="text-xs font-medium text-rho-medium uppercase tracking-[0.1em] mb-2">{eyebrow}</p>
       <h3 className="text-xl font-semibold tracking-tight mb-2">{title}</h3>
       <p className="text-sm text-ink-secondary leading-relaxed">{body}</p>
+    </div>
+  );
+}
+
+function PortafolioMiniMap() {
+  const STAGE_COLOR: Record<string, string> = {
+    Construcción: "#f59e0b",
+    "Pre-construcción": "#06b6d4",
+    Pipeline: "#8b5cf6",
+  };
+  const pins: ChileMapPin[] = PROYECTOS_GEO.map((p) => ({
+    id: p.centro,
+    name: p.nombre,
+    lat: p.lat,
+    lon: p.lon,
+    color: STAGE_COLOR[p.etapa] || "#3C8B3C",
+    size: p.mw,
+    meta: `${p.mw} MW · ${p.etapa}`,
+  }));
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6 mb-14 md:mb-20">
+      <div className="card-elevated p-5">
+        <p className="text-[10px] uppercase tracking-[0.12em] font-medium text-rho-medium mb-2">
+          Geografía
+        </p>
+        <h3 className="text-lg font-semibold tracking-tight mb-3">Activos en Chile</h3>
+        <ChileMap pins={pins} showReferences={false} height={420} />
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-3 text-[10px]">
+          {Object.entries(STAGE_COLOR).map(([k, c]) => (
+            <span key={k} className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full" style={{ background: c }} />
+              <span className="text-ink-secondary">{k}</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="card-elevated p-7 md:p-8 relative overflow-hidden">
+        <div className="absolute -top-10 -right-10 w-72 h-72 bg-emerald-100/30 rounded-full blur-3xl" />
+        <div className="relative">
+          <p className="text-[10px] uppercase tracking-[0.12em] font-medium text-rho-medium mb-2">
+            Tesis de portafolio
+          </p>
+          <h3 className="text-2xl md:text-3xl font-semibold tracking-tightest mb-4">
+            2 activos en construcción, 2 en pipeline.
+          </h3>
+          <p className="text-sm md:text-base text-ink-secondary leading-relaxed mb-6">
+            El portafolio Rho combina <strong>generación solar PV</strong> con{" "}
+            <strong>almacenamiento BESS de gran escala</strong>. Panimávida (primer agrivoltaico de
+            Chile) ya está en construcción. La Ligua (BESS 90 MW co-ubicado con METLEN) entra a
+            construcción Q4 2026. Quebrada Escobar y Ruil están en desarrollo PMGD.
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {PROYECTOS_GEO.map((p) => (
+              <div key={p.centro}>
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{ background: STAGE_COLOR[p.etapa] }}
+                  />
+                  <p className="text-sm font-semibold text-ink-primary truncate">{p.nombre}</p>
+                </div>
+                <p className="text-xl font-semibold tabular-nums mono-num">{p.mw} MW</p>
+                <p className="text-[11px] text-ink-tertiary">{p.region} · COD {p.cod}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

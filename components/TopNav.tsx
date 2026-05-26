@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { Command, Printer, FileText } from "lucide-react";
 import CommandPalette from "./CommandPalette";
 import ThemeToggle from "./ui/ThemeToggle";
+import { runAuditChecks, auditSummary } from "@/lib/audit";
+import { ShieldCheck } from "lucide-react";
 
 export interface TabDef {
   id: string;
@@ -88,6 +90,7 @@ export default function TopNav({
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            <AuditScoreBadge onClick={() => setActive("audit")} active={active === "audit"} />
             <ThemeToggle />
             <button
               onClick={() => setPaletteOpen(true)}
@@ -147,5 +150,28 @@ export default function TopNav({
         tabs={TABS}
       />
     </>
+  );
+}
+
+function AuditScoreBadge({ onClick, active }: { onClick: () => void; active: boolean }) {
+  const summary = auditSummary(runAuditChecks());
+  const tone =
+    summary.score >= 90
+      ? { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200", dot: "bg-emerald-500" }
+      : summary.score >= 70
+      ? { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200", dot: "bg-amber-500" }
+      : { bg: "bg-red-50", text: "text-red-700", border: "border-red-200", dot: "bg-red-500" };
+  return (
+    <button
+      onClick={onClick}
+      title={`Health score · ${summary.pass} pass · ${summary.warn} warn · ${summary.fail} fail`}
+      className={`hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all ${tone.bg} ${tone.text} ${tone.border} ${
+        active ? "ring-2 ring-rho-medium/40" : "hover:brightness-95"
+      }`}
+    >
+      <span className={`w-1.5 h-1.5 rounded-full ${tone.dot} animate-pulse`} />
+      <ShieldCheck className="w-3.5 h-3.5" />
+      <span className="mono-num tabular-nums">{summary.score}</span>
+    </button>
   );
 }

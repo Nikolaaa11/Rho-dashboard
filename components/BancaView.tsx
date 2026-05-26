@@ -565,25 +565,29 @@ function CapitalStack({ k }: { k: ReturnType<typeof headlineKPIs> }) {
 
   const segments = [
     {
-      label: "Called & invested",
+      label: "Invertido en proyectos",
+      sub: "Called & invested",
       value: calledInvested,
       pct: (calledInvested / totalCommitted) * 100,
       color: "var(--brand-dark)",
     },
     {
-      label: "Called & reserved",
+      label: "Reservado en CC",
+      sub: "Called & reserved",
       value: calledReserved,
       pct: (calledReserved / totalCommitted) * 100,
       color: "var(--brand-mid)",
     },
     {
-      label: "Overdue",
+      label: "Vencido sin pagar",
+      sub: "Overdue",
       value: overdue,
       pct: (overdue / totalCommitted) * 100,
       color: "var(--negative)",
     },
     {
-      label: "Unfunded",
+      label: "Plan futuro",
+      sub: "Unfunded",
       value: unfunded,
       pct: (unfunded / totalCommitted) * 100,
       color: "var(--bg-tertiary)",
@@ -631,13 +635,15 @@ function CapitalStack({ k }: { k: ReturnType<typeof headlineKPIs> }) {
                 style={{ background: s.color }}
               />
               <div className="min-w-0">
-                <p className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] font-medium">
+                <p className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] font-medium leading-tight">
                   {s.label}
                 </p>
-                <p className="mono-num text-base font-semibold">
+                <p className="mono-num text-base font-semibold mt-0.5">
                   {fmtCLP(s.value, { compact: true })}
                 </p>
-                <p className="text-[10px] text-[var(--text-tertiary)] mono-num">{s.pct.toFixed(1)}%</p>
+                <p className="text-[10px] text-[var(--text-tertiary)] mono-num">
+                  {s.pct.toFixed(1)}% · {s.sub}
+                </p>
               </div>
             </div>
           ))}

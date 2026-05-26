@@ -117,20 +117,92 @@ export default function ProyectosView() {
           />
         </div>
 
-        {/* Grid de tarjetas resumen — 1 por proyecto */}
-        <h3 className="text-2xl font-semibold tracking-tight mb-5">Proyectos del portafolio</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
-          {proyectos.map((p, i) => (
-            <ProjectCard
-              key={p.centro}
-              p={p}
-              total={totalGeneral}
-              isSelected={sel?.centro === p.centro}
-              onClick={() => setSelected(p.centro)}
-              idx={i}
-            />
-          ))}
-        </div>
+        {/* Grid de tarjetas resumen — separados activos vs discontinuados */}
+        {(() => {
+          const activos = proyectos.filter(
+            (p) =>
+              p.meta.etapa !== "Discontinuado" &&
+              p.meta.etapa !== "Estructura" &&
+              p.centro !== "Oficina"
+          );
+          const oficina = proyectos.filter((p) => p.centro === "Oficina");
+          const discontinuados = proyectos.filter((p) => p.meta.etapa === "Discontinuado");
+
+          return (
+            <>
+              <div className="flex items-baseline justify-between mb-5">
+                <h3 className="text-2xl font-semibold tracking-tight">
+                  Portafolio activo
+                  <span className="text-sm font-normal text-ink-tertiary ml-2">
+                    {activos.length} proyectos
+                  </span>
+                </h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                {activos.map((p, i) => (
+                  <ProjectCard
+                    key={p.centro}
+                    p={p}
+                    total={totalGeneral}
+                    isSelected={sel?.centro === p.centro}
+                    onClick={() => setSelected(p.centro)}
+                    idx={i}
+                  />
+                ))}
+              </div>
+
+              {oficina.length > 0 && (
+                <>
+                  <h3 className="text-lg font-semibold tracking-tight mb-3 mt-8 text-ink-secondary">
+                    Estructura corporativa
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                    {oficina.map((p, i) => (
+                      <ProjectCard
+                        key={p.centro}
+                        p={p}
+                        total={totalGeneral}
+                        isSelected={sel?.centro === p.centro}
+                        onClick={() => setSelected(p.centro)}
+                        idx={i}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {discontinuados.length > 0 && (
+                <details className="mb-12 group">
+                  <summary className="cursor-pointer flex items-baseline gap-3 mb-4 hover:opacity-80">
+                    <h3 className="text-lg font-semibold tracking-tight text-ink-tertiary">
+                      Histórico — proyectos discontinuados
+                    </h3>
+                    <span className="text-xs text-ink-tertiary">
+                      {discontinuados.length} proyecto{discontinuados.length === 1 ? "" : "s"} ·{" "}
+                      {fmtCLP(
+                        discontinuados.reduce((a, b) => a + b.totalEjecutado, 0),
+                        { compact: true }
+                      )}{" "}
+                      ejecutado · click para expandir
+                    </span>
+                  </summary>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4 opacity-75">
+                    {discontinuados.map((p, i) => (
+                      <ProjectCard
+                        key={p.centro}
+                        p={p}
+                        total={totalGeneral}
+                        isSelected={sel?.centro === p.centro}
+                        onClick={() => setSelected(p.centro)}
+                        idx={i}
+                      />
+                    ))}
+                  </div>
+                </details>
+              )}
+            </>
+          );
+        })()}
 
         {/* Ficha detallada del proyecto seleccionado */}
         {sel && (
