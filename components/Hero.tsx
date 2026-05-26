@@ -11,9 +11,19 @@ import {
   mesesAgregados,
   getESGSnapshot,
   velocityChange,
+  saldosPorCuenta,
 } from "@/lib/derived";
 import Image from "next/image";
-import { Zap, Building2, Calendar, AlertCircle, TrendingUp, Wallet, CheckCircle2 } from "lucide-react";
+import {
+  Zap,
+  Building2,
+  Calendar,
+  AlertCircle,
+  TrendingUp,
+  Wallet,
+  CheckCircle2,
+  PiggyBank,
+} from "lucide-react";
 import AnimatedNumber from "./ui/AnimatedNumber";
 import Sparkline from "./ui/Sparkline";
 
@@ -23,9 +33,12 @@ export default function Hero() {
   const esg = getESGSnapshot();
   const meses = mesesAgregados();
   const vel = velocityChange();
+  const saldos = saldosPorCuenta();
+  const saldoTotal = saldos.reduce((a, s) => a + s.saldoActual, 0);
 
   const abonoSeries = meses.map((m) => m.acumAbono);
   const egresoSeries = meses.map((m) => m.acumEgreso);
+  const saldoSeries = meses.map((m) => m.saldoFinal);
 
   const fechaCorte = new Date(k.fechaCorte + "T12:00:00").toLocaleDateString("es-CL", {
     day: "2-digit",
@@ -73,14 +86,14 @@ export default function Hero() {
           </p>
         </div>
 
-        {/* === HEADLINE KPI STRIPE — 4 tarjetas grandes con sparkline === */}
+        {/* === HEADLINE KPI STRIPE — 5 tarjetas grandes con sparkline === */}
         <div className="card-elevated overflow-hidden mb-6 animate-slide-up">
-          <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-ink-quaternary/40">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-ink-quaternary/40">
             <BigKpi
               label="Plan contractual"
               value={k.planContractual}
               format={(n) => fmtMM(n)}
-              sub="Adenda N°2 · 5.665 acciones · 85% sociedad"
+              sub="Adenda N°2 · 5.665 acciones"
               icon={<Wallet className="w-4 h-4" />}
               tone="default"
             />
@@ -88,7 +101,7 @@ export default function Hero() {
               label="Pagado al banco"
               value={k.pagado}
               format={(n) => fmtMM(n)}
-              sub={`${k.cuotasPagadas} de ${k.cuotasTotal} cuotas · ${k.pctPagado.toFixed(1)}% del plan`}
+              sub={`${k.cuotasPagadas}/${k.cuotasTotal} cuotas · ${k.pctPagado.toFixed(1)}%`}
               icon={<CheckCircle2 className="w-4 h-4" />}
               tone="accent"
               series={abonoSeries}
@@ -98,19 +111,33 @@ export default function Hero() {
               label="Capital ejecutado"
               value={k.ejecutado}
               format={(n) => fmtMM(n)}
-              sub={`${k.pctEjecutado.toFixed(1)}% del aportado · último gasto hace ${k.diasUltimo}d`}
+              sub={`${k.pctEjecutado.toFixed(0)}% del aportado · ${k.diasUltimo}d sin gasto`}
               icon={<TrendingUp className="w-4 h-4" />}
               tone="default"
               series={egresoSeries}
               seriesColor="#1A4A1A"
               delta={vel.delta}
-              deltaLabel="vs. mes anterior"
+              deltaLabel="MoM"
             />
             <BigKpi
-              label="Cuotas vencidas"
+              label="Liquidez disponible"
+              value={saldoTotal}
+              format={(n) => fmtMM(n)}
+              sub={saldos.map((s) => `CC ${s.cuenta} ${fmtCLP(s.saldoActual, { compact: true })}`).join(" + ")}
+              icon={<PiggyBank className="w-4 h-4" />}
+              tone="accent"
+              series={saldoSeries}
+              seriesColor="#06b6d4"
+            />
+            <BigKpi
+              label="Vencido sin pagar"
               value={k.vencido}
               format={(n) => fmtMM(n)}
-              sub={`${k.cuotasVencidas} ${k.cuotasVencidas === 1 ? "cuota" : "cuotas"} con plazo cumplido`}
+              sub={
+                k.cuotasVencidas === 0
+                  ? "Sin cuotas vencidas"
+                  : `${k.cuotasVencidas} ${k.cuotasVencidas === 1 ? "cuota" : "cuotas"} con plazo cumplido`
+              }
               icon={<AlertCircle className="w-4 h-4" />}
               tone={k.cuotasVencidas > 0 ? "danger" : "default"}
             />

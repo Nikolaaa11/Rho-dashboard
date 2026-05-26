@@ -16,6 +16,7 @@ import PortafolioMapView from "@/components/PortafolioMapView";
 import RiskView from "@/components/RiskView";
 import ESGView from "@/components/ESGView";
 import AuditView from "@/components/AuditView";
+import DecisionesView from "@/components/DecisionesView";
 import Footer from "@/components/Footer";
 
 export default function HomePage() {
@@ -43,6 +44,7 @@ export default function HomePage() {
       {active === "risk" && <RiskView />}
       {active === "esg" && <ESGView />}
       {active === "audit" && <AuditView />}
+      {active === "decisiones" && <DecisionesView />}
 
       <Footer />
     </main>

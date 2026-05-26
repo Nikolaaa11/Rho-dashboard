@@ -2,11 +2,11 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Command, Printer, FileText } from "lucide-react";
+import { Command, Printer, FileText, Menu, X, ShieldCheck } from "lucide-react";
 import CommandPalette from "./CommandPalette";
 import ThemeToggle from "./ui/ThemeToggle";
 import { runAuditChecks, auditSummary } from "@/lib/audit";
-import { ShieldCheck } from "lucide-react";
+import { dataset } from "@/lib/data";
 
 export interface TabDef {
   id: string;
@@ -20,6 +20,7 @@ export const TABS: TabDef[] = [
   { id: "carta", label: "Carta", group: "Resumen", description: "One-pager ejecutivo imprimible" },
   { id: "overview", label: "Resumen", group: "Resumen", description: "Vista consolidada del capital" },
   { id: "banca", label: "Banca / Directorio", group: "Resumen", description: "Vista institucional ILPA" },
+  { id: "decisiones", label: "Decisiones", group: "Resumen", description: "Action items para directorio" },
   { id: "desembolsos", label: "Plan de capital", group: "Capital", description: "6 cuotas Adenda N°2" },
   { id: "proyectos", label: "Proyectos", group: "Portafolio", description: "Ficha por proyecto" },
   { id: "mapa", label: "Mapa & Gantt", group: "Portafolio", description: "Geografía + cronograma" },
@@ -40,6 +41,7 @@ export default function TopNav({
   setActive: (v: string) => void;
 }) {
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Listen for Cmd/Ctrl+K to open palette
   useEffect(() => {
@@ -48,16 +50,27 @@ export default function TopNav({
         e.preventDefault();
         setPaletteOpen((s) => !s);
       }
-      if (e.key === "Escape") setPaletteOpen(false);
+      if (e.key === "Escape") {
+        setPaletteOpen(false);
+        setDrawerOpen(false);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // Lock body scroll when drawer open
+  useEffect(() => {
+    document.body.style.overflow = drawerOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [drawerOpen]);
+
   return (
     <>
       <nav className="sticky top-0 z-40 nav-glass no-print">
-        <div className="max-w-[1400px] mx-auto px-4 md:px-10 py-2.5 flex items-center justify-between gap-4">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-10 py-2.5 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 shrink-0">
             <Image
               src="/logos/rho-icon.png"
@@ -74,6 +87,7 @@ export default function TopNav({
                 Reporte FIP CEHTA
               </span>
             </div>
+            <StaleBadge />
           </div>
 
           <div className="hidden lg:flex items-center gap-1 overflow-x-auto flex-1 justify-center max-w-[860px]">
@@ -119,23 +133,14 @@ export default function TopNav({
               <FileText className="w-3.5 h-3.5" />
               Adenda
             </a>
-            <div className="lg:hidden">
-              <select
-                value={active}
-                onChange={(e) => setActive(e.target.value)}
-                className="px-3 py-2 rounded-full bg-surface-tertiary text-sm font-medium border-none focus:outline-none"
-              >
-                {Array.from(new Set(TABS.map((t) => t.group))).map((g) => (
-                  <optgroup key={g} label={g}>
-                    {TABS.filter((t) => t.group === g).map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.label}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-            </div>
+            {/* Mobile hamburger */}
+            <button
+              onClick={() => setDrawerOpen(true)}
+              className="lg:hidden w-9 h-9 rounded-full bg-surface-tertiary flex items-center justify-center hover:bg-ink-quaternary/40 transition-colors"
+              aria-label="Open menu"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </nav>
@@ -149,7 +154,150 @@ export default function TopNav({
         }}
         tabs={TABS}
       />
+
+      <MobileDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        active={active}
+        onSelect={(id) => {
+          setActive(id);
+          setDrawerOpen(false);
+        }}
+      />
     </>
+  );
+}
+
+// ============================================================================
+// MOBILE DRAWER
+// ============================================================================
+function MobileDrawer({
+  open,
+  onClose,
+  active,
+  onSelect,
+}: {
+  open: boolean;
+  onClose: () => void;
+  active: string;
+  onSelect: (id: string) => void;
+}) {
+  if (!open) return null;
+  const groups = Array.from(new Set(TABS.map((t) => t.group)));
+
+  return (
+    <div className="fixed inset-0 z-50 lg:hidden no-print" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+      <div
+        className="absolute top-0 right-0 bottom-0 w-[88%] max-w-[360px] bg-white shadow-float overflow-y-auto animate-slide-up"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="sticky top-0 bg-white/95 backdrop-blur border-b border-ink-quaternary/40 px-5 py-4 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold text-ink-primary">Navegación</p>
+            <p className="text-[10px] uppercase tracking-wider text-ink-tertiary">
+              Rho Generación · FIP CEHTA
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-surface-tertiary flex items-center justify-center"
+            aria-label="Close menu"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="p-3">
+          {groups.map((g) => (
+            <div key={g} className="mb-4 last:mb-0">
+              <p className="px-3 py-1.5 text-[10px] uppercase tracking-wider font-semibold text-ink-tertiary">
+                {g}
+              </p>
+              <div className="space-y-0.5">
+                {TABS.filter((t) => t.group === g).map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => onSelect(t.id)}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl transition-colors ${
+                      active === t.id
+                        ? "bg-rho-dark text-white"
+                        : "hover:bg-surface-tertiary text-ink-primary"
+                    }`}
+                  >
+                    <p className="text-sm font-medium">{t.label}</p>
+                    {t.description && (
+                      <p
+                        className={`text-[11px] mt-0.5 ${
+                          active === t.id ? "text-white/70" : "text-ink-tertiary"
+                        }`}
+                      >
+                        {t.description}
+                      </p>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          <div className="px-3 pt-4 mt-4 border-t border-ink-quaternary/40 space-y-2">
+            <button
+              onClick={() => {
+                onClose();
+                setTimeout(() => window.print(), 100);
+              }}
+              className="w-full btn-primary"
+            >
+              <Printer className="w-4 h-4" />
+              Imprimir
+            </button>
+            <a
+              href="/docs/Adenda_N2_RHO_FIP_CEHTA.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full btn-outline"
+              onClick={onClose}
+            >
+              <FileText className="w-4 h-4" />
+              Adenda N°2 (PDF)
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// STALE DATA BADGE
+// ============================================================================
+function StaleBadge() {
+  const fechaCorte = dataset.metadata?.fecha_corte;
+  if (!fechaCorte) return null;
+  const days = Math.floor((Date.now() - new Date(fechaCorte).getTime()) / 86400000);
+  const tone =
+    days <= 30
+      ? { color: "#059669", bg: "bg-emerald-50", border: "border-emerald-200", label: "Reciente" }
+      : days <= 90
+      ? { color: "#d97706", bg: "bg-amber-50", border: "border-amber-200", label: "Stale" }
+      : { color: "#dc2626", bg: "bg-red-50", border: "border-red-200", label: "Muy desactualizado" };
+
+  const fmt = new Date(fechaCorte).toLocaleDateString("es-CL", { day: "2-digit", month: "short" });
+
+  return (
+    <span
+      className={`hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${tone.bg} ${tone.border}`}
+      style={{ color: tone.color }}
+      title={`Corte de datos: ${fechaCorte} · ${days} días desde último update`}
+    >
+      <span
+        className="w-1 h-1 rounded-full"
+        style={{ background: tone.color }}
+      />
+      <span className="mono-num">{fmt}</span>
+      {days > 30 && <span className="text-[9px]">· {tone.label}</span>}
+    </span>
   );
 }
 
