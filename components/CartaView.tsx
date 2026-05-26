@@ -183,8 +183,7 @@ export default function CartaView() {
                   Cierre comercial CATL para BESS La Ligua tras visita técnica Q3 2026.
                 </Bullet>
                 <Bullet>
-                  Estudios de conexión PMGD (Ranguil III + Quebrada Escobar) para portafolio 18 MW
-                  marginales en esquema regulatorio estabilizado.
+                  Estudios de conexión PMGD Quebrada Escobar (9 MW) en esquema regulatorio estabilizado.
                 </Bullet>
                 <Bullet>
                   Reporting trimestral SFDR / PAI para acceso a fondos institucionales europeos.

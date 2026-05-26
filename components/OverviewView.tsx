@@ -88,8 +88,8 @@ export default function OverviewView() {
           <StoryCard
             icon={<Building2 className="w-5 h-5" />}
             eyebrow="Nuestra ventaja"
-            title="93 MW + 396 MWh"
-            body="Portafolio activo: primer agrivoltaico de Chile (Panimávida) y BESS de gran escala (La Ligua, 90 MW co-ubicado con METLEN 213 MW). Pipeline de 4 proyectos adicionales en distintas etapas."
+            title="102 MW + 396 MWh"
+            body="Portafolio activo: primer agrivoltaico de Chile (Panimávida, 3 MW PV + 9 MW BESS) y BESS de gran escala (La Ligua, 90 MW co-ubicado con METLEN 213 MW). Pipeline de PMGD Quebrada Escobar (9 MW) + Ruil (5 MW)."
           />
           <StoryCard
             icon={<Target className="w-5 h-5" />}

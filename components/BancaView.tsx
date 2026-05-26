@@ -190,13 +190,13 @@ function KpiRowILPA({
     <div className="card-elevated overflow-hidden">
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 divide-y md:divide-y-0 md:divide-x divide-[var(--border)]">
         <BigInstTile
-          label="Plan contractual"
+          label="Plan"
           value={k.planContractual}
           format={fmtMM}
           sub={`${ADENDA_N2_METADATA.accionesTotales.toLocaleString("es-CL")} acciones`}
         />
         <BigInstTile
-          label="Capital paid-in"
+          label="Paid-in"
           value={k.pagado}
           format={fmtMM}
           sub={`${k.pctPagado.toFixed(1)}% del plan`}
@@ -205,7 +205,7 @@ function KpiRowILPA({
           seriesColor="var(--positive)"
         />
         <BigInstTile
-          label="Capital ejecutado"
+          label="Ejecutado"
           value={k.ejecutado}
           format={fmtMM}
           sub={`${k.pctEjecutado.toFixed(0)}% del aportado`}
@@ -215,15 +215,15 @@ function KpiRowILPA({
           deltaLabel="MoM"
         />
         <BigInstTile
-          label="Saldo CC Santander"
+          label="Saldo CC"
           value={k.saldoCC}
           format={fmtMM}
-          sub="Liquidez operativa"
+          sub="Liquidez ST+BICE"
           series={saldoSeries}
           seriesColor="var(--acc-cyan)"
         />
         <BigInstTile
-          label="Cuotas vencidas"
+          label="Vencido"
           value={k.vencido}
           format={fmtMM}
           sub={`${k.cuotasVencidas} cuotas`}
@@ -233,14 +233,14 @@ function KpiRowILPA({
           label="TVPI proxy"
           value={tvpi}
           format={(n) => `${n.toFixed(2)}x`}
-          sub="(Ejecutado + Saldo) / Aportado"
+          sub="(Ejec+Saldo)/Paid-in"
           tone={tvpi >= 0.95 ? "positive" : "default"}
         />
         <BigInstTile
           label="DPI"
           value={dpi}
           format={(n) => `${n.toFixed(2)}x`}
-          sub="Pre-COD · 0 distribuciones"
+          sub="Pre-COD"
         />
         <BigInstTile
           label="OC pagadas"
@@ -281,15 +281,15 @@ function BigInstTile({
   };
   return (
     <div className="p-4 md:p-5 flex flex-col gap-1.5 bg-[var(--bg-card)] hover:bg-[var(--bg-subtle)] transition-colors">
-      <div className="flex items-center justify-between gap-1.5">
-        <span className="text-[10px] uppercase tracking-[0.08em] font-medium text-[var(--text-tertiary)] truncate">
+      <div className="flex items-center justify-between gap-1.5 min-h-[14px]">
+        <span className="text-[10px] uppercase tracking-[0.06em] font-semibold text-[var(--text-tertiary)] leading-tight">
           {label}
         </span>
         {series && series.length > 1 && (
           <Sparkline
             data={series}
             stroke={seriesColor || "var(--text-tertiary)"}
-            width={42}
+            width={38}
             height={14}
             strokeWidth={1.5}
             showDot={false}
@@ -877,7 +877,7 @@ function PerformanceSchedule({
       metric: "Almacenamiento BESS",
       value: `${esg.mwhBESS} MWh`,
       pct: "—",
-      framework: "Panimávida + La Ligua + Agua Santa",
+      framework: "Panimávida + La Ligua",
     },
     {
       cat: "Impact",

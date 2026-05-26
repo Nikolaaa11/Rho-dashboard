@@ -626,8 +626,6 @@ function ProjectsBubble() {
     const mwByCenter: Record<string, number> = {
       "Panimávida(BESS RHO)": 3,
       "La Ligua (San Expedito) ": 90,
-      "Santa Victoria 15 MW": 15,
-      "PMGD Ranguil III": 9,
       "PMGD Quebrada Escobar": 9,
     };
     return Object.entries(byCenter)

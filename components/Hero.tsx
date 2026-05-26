@@ -162,7 +162,7 @@ export default function Hero() {
             icon={<Zap className="w-5 h-5" />}
             value={`${esg.mwhBESS} MWh`}
             label="Almacenamiento BESS"
-            sub="Panimávida + La Ligua + Agua Santa"
+            sub="Panimávida + La Ligua"
           />
           <PortfolioStat
             icon={<Calendar className="w-5 h-5" />}
