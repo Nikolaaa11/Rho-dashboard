@@ -12,7 +12,9 @@ import {
   movimientosHistoricos,
   dataset,
 } from "@/lib/data";
+import { devolucionesAgregadas, listarDevoluciones } from "@/lib/derived";
 import SectionHeader from "./ui/SectionHeader";
+import { RotateCcw } from "lucide-react";
 import {
   ResponsiveContainer,
   Tooltip,
@@ -180,12 +182,48 @@ export default function ProyectosView() {
             {/* KPIs financieros del proyecto */}
             <div className="card-elevated p-8">
               <h4 className="text-lg font-semibold mb-6">Capital ejecutado en este proyecto</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <FinKpi label="Total ejecutado" value={fmtCLP(sel.totalEjecutado)} accent />
-                <FinKpi label="% del portafolio" value={`${((sel.totalEjecutado / totalGeneral) * 100).toFixed(1)}%`} />
-                <FinKpi label="Comprometido OC" value={fmtCLP(sel.ocComprometido)} />
-                <FinKpi label="Pagado vía OC" value={fmtCLP(sel.ocPagado)} />
-              </div>
+              {(() => {
+                const devsSel = listarDevoluciones().filter((d) => d.proyecto === sel.centro);
+                const totalDevSel = devsSel.reduce((a, d) => a + d.monto, 0);
+                const neto = Math.max(0, sel.totalEjecutado - totalDevSel);
+                return (
+                  <>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                      <FinKpi label="Bruto ejecutado" value={fmtCLP(sel.totalEjecutado)} />
+                      <FinKpi
+                        label="Devoluciones"
+                        value={totalDevSel > 0 ? `−${fmtCLP(totalDevSel)}` : "—"}
+                      />
+                      <FinKpi label="Neto ejecutado" value={fmtCLP(neto)} accent />
+                      <FinKpi label="Comprometido OC" value={fmtCLP(sel.ocComprometido)} />
+                    </div>
+                    {totalDevSel > 0 && (
+                      <div className="mt-5 p-4 rounded-2xl bg-emerald-50 border border-emerald-200">
+                        <div className="flex items-start gap-3">
+                          <RotateCcw className="w-4 h-4 text-emerald-700 mt-0.5 shrink-0" />
+                          <div className="flex-1">
+                            <p className="text-sm font-semibold text-emerald-900">
+                              {devsSel.length} devolución{devsSel.length === 1 ? "" : "es"} recibida{devsSel.length === 1 ? "" : "s"} por {fmtCLP(totalDevSel)}
+                            </p>
+                            <ul className="mt-2 space-y-1">
+                              {devsSel.map((d, i) => (
+                                <li key={i} className="text-xs text-emerald-800 flex items-baseline justify-between gap-3">
+                                  <span className="truncate">
+                                    {formatDate(d.fecha)} · {d.descripcion}
+                                  </span>
+                                  <span className="mono-num font-semibold whitespace-nowrap">
+                                    +{fmtCLP(d.monto, { compact: true })}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
               <div className="mt-6 pt-6 border-t border-ink-quaternary/40 grid grid-cols-2 md:grid-cols-3 gap-6 text-sm">
                 <div>
                   <p className="text-ink-tertiary uppercase text-xs tracking-wide mb-1">Movimientos</p>

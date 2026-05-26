@@ -13,6 +13,10 @@ export interface Movimiento {
   Especifico: string;
   Centro_Negocios: string;
   Aporte_K: string;
+  // Nuevos campos
+  Cuenta?: string; // "Santander" | "BICE"
+  esDevolucion?: boolean;
+  CentroDevolucion?: string; // Proyecto canónico cuando la devolución vino mal clasificada
 }
 
 export interface OC {
@@ -26,6 +30,11 @@ export interface OC {
   Observacion: string;
 }
 
+export interface CuentaMeta {
+  movimientos: number;
+  saldo_final: number;
+}
+
 export interface DataSet {
   movimientos: Movimiento[];
   oc: OC[];
@@ -35,5 +44,7 @@ export interface DataSet {
     total_oc: number;
     rango_inicio: string;
     rango_fin: string;
+    cuentas?: Record<string, CuentaMeta>;
+    devoluciones?: number;
   };
 }

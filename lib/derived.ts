@@ -10,6 +10,7 @@ import {
   projectMeta,
 } from "./data";
 import type { Movimiento, OC } from "./types";
+export type { Movimiento, OC };
 
 // ============================================================================
 // Geographic metadata for projects — used in the Mapa Chile view.
@@ -570,17 +571,139 @@ export function dataQuality(): DataQuality {
 }
 
 // Inversión por proyecto (operativa, excluyendo Oficina/Reversa)
-export function inversionPorProyecto(): { centro: string; nombre: string; valor: number; meta: any }[] {
+// Resta devoluciones que vinieron de vuelta del proyecto para mostrar INVERSIÓN NETA.
+export function inversionPorProyecto(): {
+  centro: string;
+  nombre: string;
+  valor: number;          // = bruto - devoluciones (NETO)
+  bruto: number;          // egresos totales clasificados al proyecto
+  devoluciones: number;   // abonos clasificados como devolución a ese proyecto
+  meta: any;
+}[] {
   const movs = movimientosHistoricos();
-  const map: Record<string, number> = {};
-  for (const m of movs.filter(isOperativo)) {
-    if (!m.Centro_Negocios || m.Centro_Negocios === "Reversa") continue;
-    map[m.Centro_Negocios] = (map[m.Centro_Negocios] || 0) + m.EGRESO;
+  const brutoMap: Record<string, number> = {};
+  const devMap: Record<string, number> = {};
+
+  for (const m of movs) {
+    // Egresos clasificados al proyecto
+    if (isOperativo(m) && m.Centro_Negocios && m.Centro_Negocios !== "Reversa" && m.EGRESO > 0) {
+      brutoMap[m.Centro_Negocios] = (brutoMap[m.Centro_Negocios] || 0) + m.EGRESO;
+    }
+    // Devoluciones — usar CentroDevolucion (puede ser reasignado desde "Reversa")
+    if (m.esDevolucion) {
+      const centro = m.CentroDevolucion || m.Centro_Negocios;
+      if (centro && centro !== "Reversa" && centro !== "Oficina") {
+        devMap[centro] = (devMap[centro] || 0) + m.ABONOS;
+      }
+    }
   }
-  return Object.entries(map)
-    .map(([centro, valor]) => ({ centro, valor, nombre: projectMeta(centro).nombre, meta: projectMeta(centro) }))
+
+  // Combinar keys
+  const keys = new Set([...Object.keys(brutoMap), ...Object.keys(devMap)]);
+  return Array.from(keys)
+    .map((centro) => {
+      const bruto = brutoMap[centro] || 0;
+      const devoluciones = devMap[centro] || 0;
+      return {
+        centro,
+        bruto,
+        devoluciones,
+        valor: Math.max(0, bruto - devoluciones),
+        nombre: projectMeta(centro).nombre,
+        meta: projectMeta(centro),
+      };
+    })
+    .filter((p) => p.valor > 0 || p.devoluciones > 0)
     .sort((a, b) => b.valor - a.valor);
 }
+
+// ============================================================================
+// Devoluciones — todas las que existen, con detalle
+// ============================================================================
+export interface Devolucion {
+  fecha: string;
+  monto: number;
+  proyecto: string;
+  proyectoNombre: string;
+  descripcion: string;
+  general: string;
+  cuenta: string;
+}
+
+export function listarDevoluciones(): Devolucion[] {
+  const movs = movimientosHistoricos();
+  return movs
+    .filter((m) => m.esDevolucion)
+    .map((m) => {
+      const centro = m.CentroDevolucion || m.Centro_Negocios || "—";
+      return {
+        fecha: m.FECHA_STR,
+        monto: m.ABONOS,
+        proyecto: centro,
+        proyectoNombre: projectMeta(centro).nombre,
+        descripcion: m.DESCRIPCION,
+        general: m.General,
+        cuenta: m.Cuenta || "Santander",
+      };
+    })
+    .sort((a, b) => (a.fecha < b.fecha ? 1 : -1));
+}
+
+export interface DevolucionAgg {
+  proyecto: string;
+  proyectoNombre: string;
+  count: number;
+  total: number;
+  meta: any;
+}
+
+export function devolucionesAgregadas(): DevolucionAgg[] {
+  const map: Record<string, { count: number; total: number }> = {};
+  for (const d of listarDevoluciones()) {
+    const k = d.proyecto;
+    if (!map[k]) map[k] = { count: 0, total: 0 };
+    map[k].count += 1;
+    map[k].total += d.monto;
+  }
+  return Object.entries(map)
+    .map(([proyecto, v]) => ({
+      proyecto,
+      proyectoNombre: projectMeta(proyecto).nombre,
+      meta: projectMeta(proyecto),
+      ...v,
+    }))
+    .sort((a, b) => b.total - a.total);
+}
+
+// ============================================================================
+// Saldos por cuenta (CC Santander + CC BICE)
+// ============================================================================
+export interface SaldoCuenta {
+  cuenta: string;
+  saldoActual: number;
+  movimientos: number;
+}
+
+export function saldosPorCuenta(): SaldoCuenta[] {
+  const movs = dataset.movimientos;
+  const map: Record<string, { mov: number; ultMov?: Movimiento }> = {};
+  for (const m of movs) {
+    const c = m.Cuenta || "Santander";
+    if (!map[c]) map[c] = { mov: 0 };
+    map[c].mov += 1;
+    if (!map[c].ultMov || m.FECHA_STR >= (map[c].ultMov as Movimiento).FECHA_STR) {
+      map[c].ultMov = m;
+    }
+  }
+  // Fallback: usar metadata.cuentas si existe
+  const meta = dataset.metadata?.cuentas;
+  return Object.entries(map).map(([cuenta, v]) => ({
+    cuenta,
+    saldoActual: meta?.[cuenta]?.saldo_final ?? v.ultMov?.SALDO ?? 0,
+    movimientos: v.mov,
+  }));
+}
+
 
 // OC summary
 export interface OCSummary {

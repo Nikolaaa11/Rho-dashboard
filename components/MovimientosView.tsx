@@ -11,6 +11,8 @@ export default function MovimientosView() {
   const [general, setGeneral] = useState("Todos");
   const [centro, setCentro] = useState("Todos");
   const [hito, setHito] = useState("Todos");
+  const [cuenta, setCuenta] = useState("Todos");
+  const [soloDev, setSoloDev] = useState(false);
   const [page, setPage] = useState(0);
   const perPage = 50;
 
@@ -26,27 +28,34 @@ export default function MovimientosView() {
     () => ["Todos", ...Array.from(new Set(movs.map((m) => m.Aporte_K).filter(Boolean))).sort()],
     [movs]
   );
+  const cuentas = useMemo(
+    () => ["Todos", ...Array.from(new Set(movs.map((m) => m.Cuenta).filter(Boolean) as string[])).sort()],
+    [movs]
+  );
 
   const filtered = useMemo(() => {
     return movs.filter((m) => {
       if (general !== "Todos" && m.General !== general) return false;
       if (centro !== "Todos" && m.Centro_Negocios !== centro) return false;
       if (hito !== "Todos" && m.Aporte_K !== hito) return false;
+      if (cuenta !== "Todos" && (m.Cuenta || "Santander") !== cuenta) return false;
+      if (soloDev && !m.esDevolucion) return false;
       if (q) {
         const text = `${m.DESCRIPCION} ${m.Nombre} ${m.Especifico}`.toLowerCase();
         if (!text.includes(q.toLowerCase())) return false;
       }
       return true;
     });
-  }, [movs, q, general, centro, hito]);
+  }, [movs, q, general, centro, hito, cuenta, soloDev]);
 
   const slice = filtered.slice(page * perPage, (page + 1) * perPage);
   const totalPages = Math.ceil(filtered.length / perPage);
 
   const downloadCSV = () => {
-    const headers = ["Fecha", "Nombre", "Descripción", "Abonos", "Egreso", "Saldo", "General", "Detallado", "Específico", "Centro", "Hito"];
+    const headers = ["Fecha", "Banco", "Nombre", "Descripción", "Abonos", "Egreso", "Saldo", "General", "Detallado", "Específico", "Centro", "Hito", "EsDevolucion"];
     const rows = filtered.map((m) => [
       m.FECHA_STR,
+      m.Cuenta || "Santander",
       m.Nombre,
       m.DESCRIPCION.replace(/[\n\r,]/g, " "),
       m.ABONOS,
@@ -57,6 +66,7 @@ export default function MovimientosView() {
       m.Especifico,
       m.Centro_Negocios,
       m.Aporte_K,
+      m.esDevolucion ? "SI" : "",
     ]);
     const csv = [headers, ...rows].map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
@@ -95,6 +105,16 @@ export default function MovimientosView() {
             <Select label="Categoría" value={general} onChange={(v) => { setGeneral(v); setPage(0); }} options={generales} />
             <Select label="Centro" value={centro} onChange={(v) => { setCentro(v); setPage(0); }} options={centros} />
             <Select label="Hito" value={hito} onChange={(v) => { setHito(v); setPage(0); }} options={hitos} />
+            <Select label="Banco" value={cuenta} onChange={(v) => { setCuenta(v); setPage(0); }} options={cuentas} />
+            <label className="flex items-center gap-2 text-xs text-ink-secondary cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={soloDev}
+                onChange={(e) => { setSoloDev(e.target.checked); setPage(0); }}
+                className="rounded"
+              />
+              Solo devoluciones
+            </label>
             <button onClick={downloadCSV} className="btn-ghost shrink-0">
               <Download className="w-4 h-4" />
               CSV
@@ -114,6 +134,7 @@ export default function MovimientosView() {
               <thead className="bg-surface-tertiary sticky top-0 z-10">
                 <tr className="text-left">
                   <th className="px-4 py-3 font-medium text-ink-secondary">Fecha</th>
+                  <th className="px-4 py-3 font-medium text-ink-secondary">Banco</th>
                   <th className="px-4 py-3 font-medium text-ink-secondary">Descripción</th>
                   <th className="px-4 py-3 font-medium text-ink-secondary">Centro</th>
                   <th className="px-4 py-3 font-medium text-ink-secondary">Categoría</th>
@@ -124,12 +145,23 @@ export default function MovimientosView() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-ink-quaternary/40">
-                {slice.map((m, i) => (
-                  <tr key={i} className="hover:bg-surface-tertiary/50">
+                {slice.map((m, i) => {
+                  const banco = m.Cuenta || "Santander";
+                  const bancoColor = banco === "BICE"
+                    ? "bg-blue-100 text-blue-800"
+                    : "bg-red-100 text-red-800";
+                  return (
+                  <tr key={i} className={`hover:bg-surface-tertiary/50 ${m.esDevolucion ? "bg-emerald-50/30" : ""}`}>
                     <td className="px-4 py-3 text-ink-secondary whitespace-nowrap">{fmtDate(m.FECHA_STR)}</td>
+                    <td className="px-4 py-3">
+                      <span className={`pill text-[10px] ${bancoColor}`}>{banco}</span>
+                    </td>
                     <td className="px-4 py-3 max-w-md">
-                      <div className="truncate" title={m.DESCRIPCION}>
-                        {m.DESCRIPCION || m.Nombre}
+                      <div className="truncate flex items-center gap-2" title={m.DESCRIPCION}>
+                        {m.esDevolucion && (
+                          <span className="pill pill-positive text-[10px] shrink-0">↩ Devol.</span>
+                        )}
+                        <span className="truncate">{m.DESCRIPCION || m.Nombre}</span>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-ink-secondary">
@@ -169,7 +201,8 @@ export default function MovimientosView() {
                       )}
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

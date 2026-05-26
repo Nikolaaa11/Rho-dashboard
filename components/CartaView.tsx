@@ -7,8 +7,12 @@ import {
   getRiskSurface,
   inversionPorProyecto,
   ocSummary,
+  listarDevoluciones,
+  devolucionesAgregadas,
+  saldosPorCuenta,
 } from "@/lib/derived";
 import SectionHeader from "./ui/SectionHeader";
+import DevolucionesCard from "./ui/DevolucionesCard";
 import {
   Printer,
   CheckCircle2,
@@ -31,6 +35,9 @@ export default function CartaView() {
   const risks = getRiskSurface();
   const inv = inversionPorProyecto();
   const oc = ocSummary();
+  const devs = listarDevoluciones();
+  const totalDev = devs.reduce((a, d) => a + d.monto, 0);
+  const saldos = saldosPorCuenta();
 
   const topRisks = risks.filter((r) => r.severity === "high").slice(0, 3);
 
@@ -94,7 +101,12 @@ export default function CartaView() {
               METLEN. A la fecha el FIP CEHTA ha aportado <strong>{fmtMM(k.pagado)}</strong> de los{" "}
               <strong>{fmtMM(k.planContractual)}</strong> comprometidos en la Adenda N°2,
               de los cuales <strong>{fmtMM(k.ejecutado)}</strong> ya están desplegados en gastos
-              operativos auditables.
+              operativos auditables{totalDev > 0 ? (
+                <>
+                  {" "}— y <strong className="text-emerald-700">{fmtMM(totalDev)}</strong> recuperados vía
+                  devoluciones (boletas de garantía y reembolsos)
+                </>
+              ) : null}.
             </p>
           </div>
 
@@ -117,9 +129,9 @@ export default function CartaView() {
               detail={`${k.pctEjecutado.toFixed(0)}% del aportado`}
             />
             <LetterStat
-              label="Saldo CC Santander"
-              value={fmtMM(k.saldoCC)}
-              detail="Disponible operativo"
+              label="Saldo CC (ST + BICE)"
+              value={fmtMM(saldos.reduce((a, s) => a + s.saldoActual, 0))}
+              detail={saldos.map((s) => `${s.cuenta} ${fmtCLP(s.saldoActual, { compact: true })}`).join(" · ")}
             />
           </div>
 
@@ -212,6 +224,13 @@ export default function CartaView() {
               })}
             </div>
           </div>
+
+          {/* === Devoluciones (si aplican) === */}
+          {devs.length > 0 && (
+            <div className="mb-12">
+              <DevolucionesCard compact />
+            </div>
+          )}
 
           {/* === Impacto ESG === */}
           <div className="mb-12 bg-rho-ultralight/30 rounded-3xl p-6 md:p-8">

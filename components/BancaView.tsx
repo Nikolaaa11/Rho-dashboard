@@ -15,10 +15,13 @@ import {
   ocSummary,
   velocityChange,
   getESGSnapshot,
+  saldosPorCuenta,
+  listarDevoluciones,
 } from "@/lib/derived";
 import SectionHeader from "./ui/SectionHeader";
 import AnimatedNumber from "./ui/AnimatedNumber";
 import Sparkline from "./ui/Sparkline";
+import DevolucionesCard from "./ui/DevolucionesCard";
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -132,6 +135,16 @@ export default function BancaView() {
           <CapitalStack k={k} />
           <ConcentrationGauge top1={top1Pct} top3={top3Pct} top1Name={inv[0]?.nombre || "—"} />
         </div>
+
+        {/* === SALDOS POR CUENTA === */}
+        <SaldosCuentasRow />
+
+        {/* === DEVOLUCIONES === */}
+        {listarDevoluciones().length > 0 && (
+          <div className="mb-6">
+            <DevolucionesCard />
+          </div>
+        )}
 
         {/* === ROW 3 — Performance Schedule === */}
         <div className="mb-6">
@@ -1075,6 +1088,67 @@ function RichTooltip({ active, payload, label }: any) {
           </span>
         </div>
       ))}
+    </div>
+  );
+}
+
+// ============================================================================
+// SALDOS POR CUENTA — Santander + BICE
+// ============================================================================
+function SaldosCuentasRow() {
+  const saldos = saldosPorCuenta();
+  if (saldos.length === 0) return null;
+  const total = saldos.reduce((a, s) => a + s.saldoActual, 0);
+  return (
+    <div className="card-elevated p-6 md:p-7 mb-6">
+      <div className="flex items-center gap-2 mb-1">
+        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white">
+          <span className="text-[10px] font-bold">$</span>
+        </div>
+        <p className="text-[10px] uppercase tracking-[0.12em] font-medium text-cyan-700">
+          Liquidez operativa · cuentas corrientes
+        </p>
+      </div>
+      <h3 className="text-xl md:text-2xl font-semibold tracking-tight text-ink-primary">
+        Saldo combinado: {fmtCLP(total, { compact: true })}
+      </h3>
+      <p className="text-sm text-ink-tertiary mt-1">
+        Distribución del cash disponible en cuentas bancarias activas del FIP.
+      </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-5">
+        {saldos.map((s) => {
+          const pct = total > 0 ? (s.saldoActual / total) * 100 : 0;
+          return (
+            <div
+              key={s.cuenta}
+              className="rounded-2xl border border-ink-quaternary/40 p-5 bg-surface-secondary/40"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] uppercase tracking-wider text-ink-tertiary font-medium">
+                  Banco {s.cuenta}
+                </span>
+                <span className="text-[10px] mono-num text-ink-secondary">{s.movimientos} mov.</span>
+              </div>
+              <p className="mono-num text-2xl font-semibold text-ink-primary">
+                {fmtCLP(s.saldoActual, { compact: true })}
+              </p>
+              <p className="text-xs text-ink-tertiary mt-0.5">{pct.toFixed(1)}% del saldo total</p>
+              <div className="h-1 bg-surface-tertiary rounded-full mt-3 overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-1000"
+                  style={{
+                    width: `${pct}%`,
+                    background:
+                      s.cuenta === "Santander"
+                        ? "linear-gradient(90deg, #d52b1e, #8b1816)"
+                        : "linear-gradient(90deg, #003c71, #001f3f)",
+                  }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
