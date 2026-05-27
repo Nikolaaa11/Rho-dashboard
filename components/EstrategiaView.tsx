@@ -3,6 +3,8 @@
 import { useMemo } from "react";
 import { fmtCLP, fmtMM } from "@/lib/data";
 import SectionHeader from "./ui/SectionHeader";
+import SimuladorSE from "./ui/SimuladorSE";
+import EscenariosInteractivos from "./ui/EscenariosInteractivos";
 import {
   AlertTriangle,
   Wallet,
@@ -102,11 +104,14 @@ export default function EstrategiaView() {
         {/* === ESTRATEGIA SAN EXPEDITO === */}
         <EstrategiaSanExpedito />
 
+        {/* === SIMULADOR INTERACTIVO SE === */}
+        <SimuladorSE />
+
         {/* === QUEBRADA ESCOBAR + OPORTUNIDADES === */}
         <NuevosProyectos />
 
-        {/* === ESCENARIOS / DECISIÓN === */}
-        <DecisionFinal />
+        {/* === ESCENARIOS INTERACTIVOS === */}
+        <EscenariosInteractivos />
 
         {/* === ESTRATEGIA RECOMENDADA · ROADMAP 90 DÍAS === */}
         <EstrategiaRoadmap />
@@ -901,151 +906,6 @@ function NuevosProyectos() {
             <p className="text-[11px] text-ink-secondary mt-3 leading-snug">{p.desc}</p>
           </div>
         ))}
-      </div>
-    </div>
-  );
-}
-
-// ============================================================================
-// DECISIÓN FINAL — Escenarios
-// ============================================================================
-
-function DecisionFinal() {
-  return (
-    <div className="card-elevated p-6 md:p-8 mb-8 bg-gradient-to-br from-white via-rho-ultralight/30 to-white">
-      <div className="flex items-start gap-3 mb-5">
-        <div className="w-12 h-12 rounded-2xl bg-rho-dark text-white flex items-center justify-center shrink-0">
-          <Target className="w-6 h-6" />
-        </div>
-        <div>
-          <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-rho-dark mb-1">
-            Decisión a tomar
-          </p>
-          <h3 className="text-2xl md:text-3xl font-semibold tracking-tightest">
-            ¿Sacamos $435M para Panimávida? Comparación de escenarios.
-          </h3>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-6">
-        <Escenario
-          letter="A"
-          color="#dc2626"
-          title="Sacar $435M para Panimávida YA"
-          pros={[
-            "Avance inmediato en construcción",
-            "Señal positiva a banco y CATL",
-          ]}
-          cons={[
-            "Quedamos sin reserva FIP",
-            "Si SE se atrasa → sin caja",
-            "Aún faltan $2.565M para terminar Panimávida",
-            "Sin garantía de financiamiento bancario posterior",
-          ]}
-          veredicto="Alto riesgo. NO RECOMENDADO sin contraparte."
-        />
-        <Escenario
-          letter="B"
-          color="#f59e0b"
-          title="Esperar venta SE primero"
-          pros={[
-            "Caja segura post-venta",
-            "Devolución inversionistas (cristaliza retorno)",
-            "Pool $1.000M disponible para reinversión / dividendos",
-          ]}
-          cons={[
-            "Ventana de timing depende de SE (incertidumbre)",
-            "Pierdes momentum en Panimávida",
-            "Inversionista CORFO puede demorarse",
-          ]}
-          veredicto="Conservador pero realista. RAZONABLE."
-        />
-        <Escenario
-          letter="C"
-          color="#10b981"
-          title="Levantar inversionista + CORFO (recomendado)"
-          pros={[
-            "$750M LP + $750M CORFO = $1.500M equity",
-            "Banco entra con $1.500M match → $3.000M total",
-            "Panimávida construido completo",
-            "Reservas FIP intactas",
-          ]}
-          cons={[
-            "Tiempo de levantamiento (3-6 meses)",
-            "Requiere pitch a LPs nuevos",
-            "Diluir levemente ownership según términos",
-          ]}
-          veredicto="ESTRATEGIA PROPUESTA. Apila equity → CORFO → banco."
-          highlight
-        />
-      </div>
-    </div>
-  );
-}
-
-function Escenario({
-  letter,
-  color,
-  title,
-  pros,
-  cons,
-  veredicto,
-  highlight,
-}: {
-  letter: string;
-  color: string;
-  title: string;
-  pros: string[];
-  cons: string[];
-  veredicto: string;
-  highlight?: boolean;
-}) {
-  return (
-    <div
-      className={`rounded-2xl p-5 border-2 flex flex-col ${highlight ? "shadow-lg ring-2 ring-emerald-300/50" : ""}`}
-      style={{ borderColor: color + "50", background: color + "06" }}
-    >
-      <div className="flex items-center gap-3 mb-3">
-        <div
-          className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-bold text-lg"
-          style={{ background: color }}
-        >
-          {letter}
-        </div>
-        <p className="text-sm font-semibold text-ink-primary leading-tight">{title}</p>
-      </div>
-
-      <div className="mb-3">
-        <p className="text-[10px] uppercase tracking-wider text-emerald-700 font-bold mb-1">
-          ✓ Pros
-        </p>
-        <ul className="space-y-1">
-          {pros.map((p, i) => (
-            <li key={i} className="text-xs text-ink-secondary flex items-start gap-1.5">
-              <span className="text-emerald-600 mt-0.5">·</span>
-              <span>{p}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="mb-4">
-        <p className="text-[10px] uppercase tracking-wider text-red-700 font-bold mb-1">✗ Cons</p>
-        <ul className="space-y-1">
-          {cons.map((c, i) => (
-            <li key={i} className="text-xs text-ink-secondary flex items-start gap-1.5">
-              <span className="text-red-500 mt-0.5">·</span>
-              <span>{c}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div
-        className="mt-auto pt-3 border-t text-[11px] font-semibold leading-snug"
-        style={{ borderColor: color + "30", color }}
-      >
-        ▸ {veredicto}
       </div>
     </div>
   );
