@@ -5,6 +5,7 @@ import { fmtCLP, fmtMM } from "@/lib/data";
 import SectionHeader from "./ui/SectionHeader";
 import SimuladorSE from "./ui/SimuladorSE";
 import EscenariosInteractivos from "./ui/EscenariosInteractivos";
+import TrackRecord from "./ui/TrackRecord";
 import {
   AlertTriangle,
   Wallet,
@@ -91,6 +92,9 @@ export default function EstrategiaView() {
 
         {/* === HERO RESUMEN === */}
         <ResumenEjecutivo />
+
+        {/* === TRACK RECORD === */}
+        <TrackRecord />
 
         {/* === SITUACIÓN 1 === */}
         <SituacionUno />

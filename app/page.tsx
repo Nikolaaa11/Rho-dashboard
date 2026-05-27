@@ -18,6 +18,7 @@ import ESGView from "@/components/ESGView";
 import AuditView from "@/components/AuditView";
 import DecisionesView from "@/components/DecisionesView";
 import EstrategiaView from "@/components/EstrategiaView";
+import IRDeckView from "@/components/IRDeckView";
 import Footer from "@/components/Footer";
 
 export default function HomePage() {
@@ -47,6 +48,7 @@ export default function HomePage() {
       {active === "audit" && <AuditView />}
       {active === "decisiones" && <DecisionesView />}
       {active === "estrategia" && <EstrategiaView />}
+      {active === "ir-deck" && <IRDeckView />}
 
       <Footer />
     </main>
